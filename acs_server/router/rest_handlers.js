@@ -36,7 +36,7 @@ module.exports = function handlingRequests(connection, app){
             }
             else {
                 console.log(rows);
-                res.json({"message": " user created! "});
+                res.json({"message": "success"});
 
             }
 

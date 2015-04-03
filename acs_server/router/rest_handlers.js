@@ -197,69 +197,17 @@ module.exports = function handlingRequests(connection, app){
 
     });
 
-    /*app.get('/test/:testnumber', function(req, res){
+    app.get('/user/:userId/accidentalert', function sendAlert(req, res){
 
-        var enumber = req.params.testnumber;
-        console.log("test_id:" +enumber);
+        var customer_id = req.params.userId;
+        console.log("user id is "+customer_id);
 
-        async.parallel({
+        var latitude = req.query.latitude;
+        var longitude = req.query.longitude;
+        console.log("user location: " +latitude +" "+longitude);
 
-            one: function (callback) {
-
-                checkContact(enumber, function (err, result) {
-
-                    if (err) return callback(err);
-
-                    callback(null, result);
-
-
-                });
-
-            },
-
-            two: function (callback) {
-
-                checkContact('2344', function (err, result) {
-
-                    if (err) return callback(err);
-
-                    callback(null, result);
-
-
-                });
-
-            },
-
-            three: function (callback) {
-
-                checkContact('2347', function (err, result) {
-
-                    if (err) return callback(err);
-
-                    callback(null, result);
-
-
-                });
-
-            }
-
-
-        }, function searchForEcontacts(err, values){
-
-            console.log("results");
-            console.log(values.one);
-            console.log(values.two);
-            console.log(values.three);
-
-
-        });
-
-
-
-        res.json({"contactID":""});
-    });*/
-
-
+        res.json({"message":"details sent to econtacts"});
+    });
 
     function checkContact(eName, ePhone,eEmail, callback){
 
@@ -324,5 +272,6 @@ module.exports = function handlingRequests(connection, app){
 
         });
     }
+
 
 }

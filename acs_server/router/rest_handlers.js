@@ -7,7 +7,16 @@ module.exports = function handlingRequests(connection, app){
     var bodyParser  =   require('body-parser');
     var mysql       =   require("mysql");
     var async       =   require("async");
+    var nodemailer  =   require("nodemailer");
 
+    var smtpTransport = nodemailer.createTransport("SMTP",{
+
+        service: "Gmail",
+        auth: {
+            user: "accident.sensor@gmail.com",
+            pass: "accsensor"
+        }
+    });
     app.use(bodyParser.json());
 
 
@@ -206,6 +215,80 @@ module.exports = function handlingRequests(connection, app){
         var longitude = req.query.longitude;
         console.log("user location: " +latitude +" "+longitude);
 
+        async.waterfall([
+
+                function retrieveEcontactsIds(callback){
+
+                    getCustomerInfo(customer_id, function (err, result) {
+
+                            if (err) return callback(err);
+
+                        console.log("retireved econtactIds successfully");
+                        callback(null, result);
+
+
+                    });
+                },
+                function retireveEcontactsDetails(customerInfo,callback){
+
+                    console.log("in parallel async");
+                    console.log(customerInfo.customer_phone);
+                    console.log(customerInfo.customer_name);
+                    console.log(customerInfo.customer_econtact1);
+                    console.log(customerInfo.customer_econtact2);
+                    console.log(customerInfo.customer_econtact3);
+
+                    var customer_name = customerInfo.customer_name;
+                    var customer_phone = customerInfo.customer_phone;
+                    var econtact1Id = customerInfo.customer_econtact1;
+                    var econtact2Id = customerInfo.customer_econtact2;
+                    var econtact3Id = customerInfo.customer_econtact3;
+                    async.parallel({
+
+                        oneContactSending: function(callback){
+
+                            sendAlertToEcontacts(customer_name, customer_phone,
+                                latitude,longitude,econtact1Id,
+                                function (err,result) {
+
+                                if (err) return console.log(err);
+                                console.log("sent to alert to econtact1 successfully ");
+                                console.log(result);
+                            });
+                        },
+                        twoContactSending: function(callback){
+
+                            sendAlertToEcontacts(customer_name, customer_phone,
+                                latitude,longitude,econtact2Id,
+                                function (err,result) {
+
+                                if (err) return console.log(err);
+                                console.log("sent to alert to econtact2 successfully ");
+                                console.log(result);
+                            });
+                        },
+                        threeContactSending: function(callback){
+
+                            sendAlertToEcontacts(customer_name, customer_phone,
+                                latitude,longitude,econtact3Id,
+                                function (err,result) {
+
+                                if (err) return console.log(err);
+                                console.log("sent to alert to econtact3 successfully ");
+                                console.log(result);
+                            });
+                        }
+                    },callback);
+                    callback(null,"sent complete");
+                }
+
+            ], function DoneAlerting(err,result){
+
+                console.log("at done ");
+
+            }
+
+        );
         res.json({"message":"details sent to econtacts"});
     });
 
@@ -273,5 +356,77 @@ module.exports = function handlingRequests(connection, app){
         });
     }
 
+    function getCustomerInfo(customer_id,callback){
+
+        var query = "SELECT customer_name, customer_phone, " +
+            "customer_econtact1, customer_econtact2, customer_econtact3 " +
+            "FROM acs_cust WHERE customer_id = ? ;";
+
+        var inputs = [customer_id];
+        var injectionQuery = mysql.format(query, inputs);
+        console.log(injectionQuery);
+
+        connection.query(injectionQuery, function resultSet(err, rows){
+
+            if(err){
+                console.log("error in econtactid retrieval: " +err);
+            }
+            else{
+
+                callback(null,rows[0]);
+            }
+        });
+    }
+
+
+    function sendAlertToEcontacts(customer_name,customer_phone,latitude,
+                                  longitude,econtacts_id,callback){
+
+        var query = "SELECT contact_phone, contact_email FROM acs_contacts " +
+            "WHERE contacts_id = ? ;";
+
+        var inputs = [econtacts_id];
+        var injectionQuery = mysql.format(query, inputs);
+        console.log(injectionQuery);
+
+        connection.query(injectionQuery, function resultSet(err, rows){
+
+            if(err){
+                console.log("error in contact info retrieval: " +err);
+            }
+            else{
+
+                console.log(rows[0]);
+
+                //starting to send alert
+                var mailOptions = {
+
+                    to: ""+rows[0].contact_email+","+
+                        rows[0].contact_phone+"@tmomail.net",
+                    subject : "Toy Story Alert",
+                    text : customer_name+" using phone number "+customer_phone+
+                    " at ("+latitude+","+longitude+") has once said:" +
+                    " TO INFINITY AND BEYOND!!!"
+                }
+                console.log(mailOptions);
+                smtpTransport.sendMail(mailOptions, function mailSent(err,
+                                                                      result){
+
+                    if(err){
+
+                        console.log(err);
+                    }
+                    else{
+                        console.log("message sent successfully to "+
+                        rows[0].contact_email);
+                        callback(null,"confirmed!!");
+                        //console.log(result);
+                    }
+                });
+
+
+            }
+        });
+    }
 
 }

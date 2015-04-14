@@ -252,7 +252,8 @@ module.exports = function handlingRequests(connection, app){
                                 function (err,result) {
 
                                 if (err) return console.log(err);
-                                console.log("sent to alert to econtact1 successfully ");
+                                console.log("sent to alert to " +
+                                "econtact1 successfully ");
                                 console.log(result);
                             });
                         },
@@ -263,18 +264,20 @@ module.exports = function handlingRequests(connection, app){
                                 function (err,result) {
 
                                 if (err) return console.log(err);
-                                console.log("sent to alert to econtact2 successfully ");
+                                console.log("sent to alert to " +
+                                "econtact2 successfully ");
                                 console.log(result);
                             });
                         },
                         threeContactSending: function(callback){
 
                             sendAlertToEcontacts(customer_name, customer_phone,
-                                latitude,longitude,econtact2Id,
+                                latitude,longitude,econtact3Id,
                                 function (err,result) {
 
                                 if (err) return console.log(err);
-                                console.log("sent to alert to econtact3 successfully ");
+                                console.log("sent to alert to " +
+                                "econtact3 successfully ");
                                 console.log(result);
                             });
                         }

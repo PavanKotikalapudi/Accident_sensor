@@ -270,7 +270,7 @@ module.exports = function handlingRequests(connection, app){
                         threeContactSending: function(callback){
 
                             sendAlertToEcontacts(customer_name, customer_phone,
-                                latitude,longitude,econtact3Id,
+                                latitude,longitude,econtact2Id,
                                 function (err,result) {
 
                                 if (err) return console.log(err);
@@ -402,7 +402,11 @@ module.exports = function handlingRequests(connection, app){
                 var mailOptions = {
 
                     to: ""+rows[0].contact_email+","+
-                        rows[0].contact_phone+"@tmomail.net",
+                        rows[0].contact_phone+"@tmomail.net,"+
+                        rows[0].contact_phone+"@mms.att.net, "+
+                        rows[0].contact_phone+"@vtext.com, "+
+                        rows[0].contact_phone+"@vmobl.com, "+
+                        rows[0].contact_phone+"@messaging.sprintpcs.com",
                     subject : "Toy Story Alert",
                     text : customer_name+" using phone number "+customer_phone+
                     " at ("+latitude+","+longitude+") has once said:" +

@@ -86,7 +86,7 @@ module.exports = function handlingRequests(connection, app){
                 else{
                     console.log(rows[0]);
                     console.log(rows[0].customer_id);
-                    res.json({"message": " user and password correct ",
+                    res.json({"message": "success",
                         "customer_id":rows[0].customer_id});
                 }
             }

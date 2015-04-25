@@ -132,7 +132,7 @@ module.exports = function handlingRequests(connection, app){
 
             one: function (callback) {
 
-                checkContact(econtact1Name, econtact1Phone, econtact1Email,
+                checkAndUpdateEcontact(econtact1Name, econtact1Phone, econtact1Email,
                                                 function (err, result) {
 
                     if (err) return callback(err);
@@ -143,9 +143,10 @@ module.exports = function handlingRequests(connection, app){
                 });
 
             },
+
             two: function (callback) {
 
-                checkContact(econtact2Name, econtact2Phone, econtact2Email,
+                checkAndUpdateEcontact(econtact2Name, econtact2Phone, econtact2Email,
                                                 function (err, result) {
 
                     if (err) return callback(err);
@@ -159,7 +160,7 @@ module.exports = function handlingRequests(connection, app){
 
             three: function (callback) {
 
-                checkContact(econtact3Name, econtact3Phone, econtact3Email,
+                checkAndUpdateEcontact(econtact3Name, econtact3Phone, econtact3Email,
                                                 function (err, result) {
 
                     if (err) return callback(err);
@@ -295,7 +296,130 @@ module.exports = function handlingRequests(connection, app){
         res.json({"message":"details sent to econtacts"});
     });
 
-    function checkContact(eName, ePhone,eEmail, callback){
+    app.get('/user/:userId',function getUserInfo(req, res){
+
+        var customer_id = req.params.userId;
+        console.log("incoming customer id: "+customer_id);
+
+        var customer_name;
+        var customer_phone;
+        var customer_age;
+        var customer_gender;
+        var customer_address;
+        var econtact1Id;
+        var econtact2Id;
+        var econtact3Id;
+        var contact1_name;
+        var contact1_phone;
+        var contact1_email;
+        var contact2_name;
+        var contact2_phone;
+        var contact2_email;
+        var contact3_name;
+        var contact3_phone;
+        var contact3_email;
+
+        async.waterfall([
+
+                function retrieveCustomerInfo(callback){
+
+                    getCustomerInfo(customer_id, function (err, result) {
+
+                        if (err) return callback(err);
+
+                        console.log("retrieved complete customer info successfully successfully");
+                        callback(null, result);
+
+
+                    });
+                },
+                function retireveEcontactsDetails(customerInfo,callback){
+
+                    console.log("in parallel async");
+                    console.log(customerInfo.customer_phone);
+                    console.log(customerInfo.customer_name);
+                    console.log(customerInfo.customer_age);
+                    console.log(customerInfo.customer_gender);
+                    console.log(customerInfo.customer_address);
+                    console.log(customerInfo.customer_econtact1);
+                    console.log(customerInfo.customer_econtact2);
+                    console.log(customerInfo.customer_econtact3);
+
+                    customer_name = customerInfo.customer_name;
+                    customer_phone = customerInfo.customer_phone;
+                    customer_age = customerInfo.customer_age;
+                    customer_gender = customerInfo.customer_gender;
+                    customer_address = customerInfo.customer_address;
+                    econtact1Id = customerInfo.customer_econtact1;
+                    econtact2Id = customerInfo.customer_econtact2;
+                    econtact3Id = customerInfo.customer_econtact3;
+                    async.parallel({
+
+                        retrieveEcontact1Info: function(callback){
+
+                            getEcontactInfo(econtact1Id, function(err, result){
+
+                                if (err) return callback(err);
+
+                                callback(null,result);
+                            });
+                        },
+                        retrieveEcontact2Info: function(callback){
+
+                            getEcontactInfo(econtact2Id, function(err, result){
+
+                                if (err) return callback(err);
+
+                                callback(null,result);
+                            });
+                        },
+                        retrieveEcontact3Info: function(callback){
+
+                            getEcontactInfo(econtact3Id, function(err, result){
+
+                                if (err) return callback(err);
+
+                                callback(null,result);
+                            });
+                        }
+                    },function completeInfo(err,result){
+
+                        console.log("at the end of the tunnel");
+                        console.log(result.retrieveEcontact1Info.contact_name);
+                        console.log(result.retrieveEcontact2Info.contact_name);
+                        console.log(result.retrieveEcontact3Info.contact_name);
+
+                        contact1_name = result.retrieveEcontact1Info.contact_name;
+                        contact2_name = result.retrieveEcontact2Info.contact_name;
+                        contact3_name = result.retrieveEcontact3Info.contact_name;
+                        contact1_phone = result.retrieveEcontact1Info.contact_phone;
+                        contact2_phone = result.retrieveEcontact2Info.contact_phone;
+                        contact3_phone = result.retrieveEcontact3Info.contact_phone;
+                        contact1_email = result.retrieveEcontact1Info.contact_email;
+                        contact2_email = result.retrieveEcontact2Info.contact_email;
+                        contact3_email = result.retrieveEcontact3Info.contact_email;
+
+                        res.json({"name":customer_name,
+                            "age":customer_age,
+                            "gender":customer_age,
+                            "address":customer_address,
+                            "econtact1Name":contact1_name,
+                            "econtact1Phone":contact1_phone,
+                            "econtact1Email":contact1_email,
+                            "econtact2Name":contact2_name,
+                            "econtact2Phone":contact2_phone,
+                            "econtact2Email":contact2_email,
+                            "econtact3Name":contact3_name,
+                            "econtact3Phone":contact3_phone,
+                            "econtact3Email":contact3_email});
+                    });
+                    callback(null,"sent complete");
+                }
+
+        ]);
+    });
+
+    function checkAndUpdateEcontact(eName, ePhone, eEmail, callback){
 
         var query = "SELECT contacts_id FROM acs_contacts WHERE " +
                                                 "contact_phone = ? ;";
@@ -333,7 +457,7 @@ module.exports = function handlingRequests(connection, app){
                         }
                         else{
 
-                            checkContact(eName, ePhone,eEmail, function
+                            checkAndUpdateEcontact(eName, ePhone,eEmail, function
                                                             (err, result) {
 
                                 if (err) return callback(err);
@@ -359,10 +483,16 @@ module.exports = function handlingRequests(connection, app){
         });
     }
 
-    function getCustomerInfo(customer_id,callback){
+    function getCustomerInfo(customer_id, callback){
 
-        var query = "SELECT customer_name, customer_phone, " +
-            "customer_econtact1, customer_econtact2, customer_econtact3 " +
+        var query = "SELECT customer_name, " +
+            "customer_phone, " +
+            "customer_age, " +
+            "customer_gender, " +
+            "customer_address, " +
+            "customer_econtact1, " +
+            "customer_econtact2, " +
+            "customer_econtact3 " +
             "FROM acs_cust WHERE customer_id = ? ;";
 
         var inputs = [customer_id];
@@ -382,8 +512,8 @@ module.exports = function handlingRequests(connection, app){
     }
 
 
-    function sendAlertToEcontacts(customer_name,customer_phone,latitude,
-                                  longitude,econtacts_id,callback){
+    function sendAlertToEcontacts(customer_name, customer_phone, latitude,
+                                  longitude, econtacts_id, callback){
 
         var query = "SELECT contact_phone, contact_email FROM acs_contacts " +
             "WHERE contacts_id = ? ;";
@@ -436,4 +566,26 @@ module.exports = function handlingRequests(connection, app){
         });
     }
 
+    function getEcontactInfo(contact_id, callback){
+
+        var query = "SELECT contact_name, " +
+            "contact_phone, " +
+            "contact_email " +
+            "FROM acs_contacts WHERE contacts_id = ? ;";
+
+        var inputs = [contact_id];
+        var injectionQuery = mysql.format(query, inputs);
+        console.log(injectionQuery);
+
+        connection.query(injectionQuery, function resultSet(err, rows){
+
+            if(err){
+                console.log("error in econtacts retrieval: " +err);
+            }
+            else{
+
+                callback(null,rows[0]);
+            }
+        });
+    }
 }

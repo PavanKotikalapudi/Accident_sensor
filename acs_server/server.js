@@ -2,20 +2,21 @@
  * Created by sunny on 3/24/15.
  */
 var express = require('express');
-
+var winston = require('winston');
 var app = express();
 
-require('./router/db_access')(app);
+require('./router/db_access')(app,winston);
 
-
+//uncomment below line to see debug details of server
+//winston.level = 'debug';
 app.get('/',function Test(req, res){
 
-    res.json("good work!!");
+  winston.info('in sample api');
+  res.json("good work!!");
 });
 var server = app.listen(8181, function(){
 
-    var host    =   server.address().address;
-    var port    =   server.address().port;
-
-    console.log('acs-server listening at http://%s:%s', host, port);
+  var host    =   server.address().address;
+  var port    =   server.address().port;
+  winston.info('Acs server using logger on http://'+host+':'+port);
 });

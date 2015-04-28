@@ -2,98 +2,77 @@
  * Created by sunny on 3/27/15.
  */
 
-module.exports = function handlingRequests(connection, app){
+module.exports = function handlingRequests(connection, app, winston){
 
-    var bodyParser  =   require('body-parser');
-    var mysql       =   require("mysql");
-    var async       =   require("async");
-    var nodemailer  =   require("nodemailer");
+  var bodyParser  =   require('body-parser');
+  var mysql       =   require("mysql");
+  var async       =   require("async");
+  var nodemailer  =   require("nodemailer");
 
-    var smtpTransport = nodemailer.createTransport("SMTP",{
+  var smtpTransport = nodemailer.createTransport("SMTP",{
+      service: "Gmail",
+      auth: {
+          user: "accident.sensor@gmail.com",
+          pass: "accsensor"
+      }
+  });
+  winston.info('configured nodemailer ready to serve');
+  app.use(bodyParser.json());
 
-        service: "Gmail",
-        auth: {
-            user: "accident.sensor@gmail.com",
-            pass: "accsensor"
-        }
+  app.post('/register', function toRegister(req, res) {
+
+    var phone = req.body.phone;
+    var password = req.body.password;
+    winston.info('new user registering ', phone);
+
+    var query = "INSERT INTO acs_cust(customer_phone, customer_password) " +
+          "VALUES (?,?)";
+    var inputs = [phone, password];
+    var injectionQuery = mysql.format(query, inputs);
+    winston.debug('query to register user ',injectionQuery);
+    connection.query(injectionQuery, function resultSet(error, rows) {
+          //connection.release(); not working
+      if (error) {
+        winston.info('Error in insertion to database',error);
+        res.json({"message": "ERROR!! user already exists or " +
+        "details provided not correct"});
+      }
+      else {
+        winston.debug(rows);
+        winston.info('registration successful for ', phone);
+        res.json({"message": "success"});
+      }
     });
-    app.use(bodyParser.json());
+  });
 
+  app.post('/login', function toLogin(req, res){
 
-    app.post('/register', function toRegister(req, res) {
-
-        var phone = req.body.phone;
-        var password = req.body.password;
-        console.log(phone);
-        console.log(password);
-
-
-        var query = "INSERT INTO acs_cust(customer_phone, customer_password) " +
-            "VALUES (?,?)";
-        var inputs = [phone, password];
-        var injectionQuery = mysql.format(query, inputs);
-        console.log(injectionQuery);
-        connection.query(injectionQuery, function resultSet(error, rows) {
-
-            //connection.release(); not working
-            if (error) {
-
-                console.log("Error in insertion to database");
-                res.json({"message": "ERROR!! user already exists"});
-
-
-            }
-            else {
-                console.log(rows);
-                res.json({"message": "success"});
-
-            }
-
-
-        });
-
-    });
-
-    app.post('/login', function toLogin(req, res){
-
-        var username = req.body.phone;
-        var password = req.body.password;
-        console.log(username);
-        console.log(password);
-        var query = "SELECT customer_id FROM acs_cust WHERE customer_phone= ?" +
-            " and customer_password = ? ;";
-        var inputs = [username, password];
-        var injectionQuery = mysql.format(query, inputs);
-        console.log(injectionQuery);
-
-        connection.query(injectionQuery, function resultSet(error, rows){
-
+    var username = req.body.phone;
+    var password = req.body.password;
+    winston.info('user ',username,'trying to login');
+    var query = "SELECT customer_id FROM acs_cust WHERE customer_phone= ?" +
+        " and customer_password = ? ;";
+    var inputs = [username, password];
+    var injectionQuery = mysql.format(query, inputs);
+    winston.debug('login query injected ',injectionQuery);
+    connection.query(injectionQuery, function resultSet(error, rows){
             //connection.release();
-            if (error) {
-
-                console.log("Error in login "+ error);
-
-
-            }
-            else {
-
-
-                if (rows[0] === undefined){
-                    console.log(rows[0] === undefined);
-                    res.json({"message": "user or password doesn't match!!"});
-
-                }
-                else{
-                    console.log(rows[0]);
-                    console.log(rows[0].customer_id);
-                    res.json({"message": "success",
-                        "customer_id":rows[0].customer_id});
-                }
-            }
-        });
-
-
+      if (error) {
+        winston.info('Error in login ',error);
+        res.json({"message":"server error. please try again later"});
+      }
+      else {
+        if (rows[0] === undefined){
+          winston.info('login unsuccessful');
+          res.json({"message": "user or password doesn't match!!"});
+        }
+        else{
+          winston.info('successfully logged in user ', phone);
+          res.json({"message": "success", "customer_id":rows[0].customer_id});
+        }
+      }
     });
+  });
 
     app.put('/user/:userId/updateprofile', function toUpdateProfile(req, res){
 

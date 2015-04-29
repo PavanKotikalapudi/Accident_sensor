@@ -16,7 +16,7 @@ module.exports = function handlingRequests(connection, app, winston){
           pass: "accsensor"
       }
   });
-  winston.info('configured nodemailer ready to serve');
+  winston.info('configured nodemailer. ready to serve');
   app.use(bodyParser.json());
 
   app.post('/register', function toRegister(req, res) {
@@ -74,397 +74,309 @@ module.exports = function handlingRequests(connection, app, winston){
     });
   });
 
-    app.put('/user/:userId/updateprofile', function toUpdateProfile(req, res){
+  app.put('/user/:userId/updateprofile', function toUpdateProfile(req, res){
 
-        /*{"name":"sunny",
-         "age":"24",
-         "gender":"m",
-         "address":"abcd",
-         "econtact1Name":"rk",
-         "econtact1Phone":"2343",
-         "econtact1Email":"XXX",
-         "econtact2Name":"XXX",
-         "econtact2Phone":"2222",
-         "econtact2Email":"XXX",
-         "econtact3Name":"XXX",
-         "econtact3Phone":"2345",
-         "econtact3Email":"XXX"}*/
+    var customer_id = req.params.userId;
+    winston.info('updating profile info of user ',customer_id);
+    var name = req.body.name;
+    var age = req.body.age;
+    var gender = req.body.gender;
+    var address = req.body.address;
+    var econtact1Name = req.body.econtact1Name;
+    var econtact1Phone = req.body.econtact1Phone;
+    var econtact1Email = req.body.econtact1Email;
+    var econtact2Name = req.body.econtact2Name;
+    var econtact2Phone = req.body.econtact2Phone;
+    var econtact2Email = req.body.econtact2Email;
+    var econtact3Name = req.body.econtact3Name;
+    var econtact3Phone = req.body.econtact3Phone;
+    var econtact3Email = req.body.econtact3Email;
 
-        var customer_id = req.params.userId;
-        console.log(customer_id);
-        console.log("inside put");
-        var name = req.body.name;
-        var age = req.body.age;
-        var gender = req.body.gender;
-        var address = req.body.address;
-        var econtact1Name = req.body.econtact1Name;
-        var econtact1Phone = req.body.econtact1Phone;
-        var econtact1Email = req.body.econtact1Email;
-        var econtact2Name = req.body.econtact2Name;
-        var econtact2Phone = req.body.econtact2Phone;
-        var econtact2Email = req.body.econtact2Email;
-        var econtact3Name = req.body.econtact3Name;
-        var econtact3Phone = req.body.econtact3Phone;
-        var econtact3Email = req.body.econtact3Email;
+    async.parallel({
 
-        async.parallel({
+      one: function (callback) {
 
-            one: function (callback) {
-
-                checkAndUpdateEcontact(econtact1Name, econtact1Phone, econtact1Email,
+        checkAndUpdateEcontact(econtact1Name, econtact1Phone, econtact1Email,
                                                 function (err, result) {
+          if (err) return callback(err);
+          callback(null, result);
+        });
+      },
+      two: function (callback) {
 
-                    if (err) return callback(err);
-
-                    callback(null, result);
-
-
-                });
-
-            },
-
-            two: function (callback) {
-
-                checkAndUpdateEcontact(econtact2Name, econtact2Phone, econtact2Email,
+        checkAndUpdateEcontact(econtact2Name, econtact2Phone, econtact2Email,
                                                 function (err, result) {
+          if (err) return callback(err);
+          callback(null, result);
+        });
+      },
+      three: function (callback) {
 
-                    if (err) return callback(err);
-
-                    callback(null, result);
-
-
-                });
-
-            },
-
-            three: function (callback) {
-
-                checkAndUpdateEcontact(econtact3Name, econtact3Phone, econtact3Email,
+        checkAndUpdateEcontact(econtact3Name, econtact3Phone, econtact3Email,
                                                 function (err, result) {
+          if (err) return callback(err);
+          callback(null, result);
+        });
+      }
+    }, function evaluateResults(err, values){
 
-                    if (err) return callback(err);
+      winston.debug('returned with contacts_ids');
 
-                    callback(null, result);
-
-
-                });
-
-            }
-
-        }, function evaluateResults(err, values){
-
-            console.log("results");
-            console.log(values.one);
-            console.log(values.two);
-            console.log(values.three);
-            console.log("---------------");
-            var query = "UPDATE acs_cust SET customer_name = ?," +
+      var query = "UPDATE acs_cust SET customer_name = ?," +
                 " customer_age = ?, customer_gender = ?, " +
                 "customer_address = ?,customer_econtact1 = ?, " +
                 "customer_econtact2 = ?, customer_econtact3 = ? " +
                 "WHERE customer_id ='"+customer_id+"';";
-            var inputs = [name, age, gender, address, values.one, values.two,
+      var inputs = [name, age, gender, address, values.one, values.two,
                             values.three];
-            var injectionQuery = mysql.format(query, inputs);
-            console.log(injectionQuery);
+      var injectionQuery = mysql.format(query, inputs);
+      winston.debug('query to update the customer info ',injectionQuery);
+      connection.query(injectionQuery, function(err, rows){
 
-            connection.query(injectionQuery, function(err, rows){
-
-                if (err){
-
-                    console.log(err);
-                }
-                else{
-
-                    console.log(rows);
-                    res.json({"message":"data updated"});
-                }
-            });
-
-        });
-
-
+        if (err){
+          winston.info('error at updating customer info :',err);
+          res.json({"message":"error in updating info"});
+        }
+        else{
+          winston.debug(rows);
+          winston.info('updated info successfully of user ',customer_id);
+          res.json({"message":"data updated"});
+        }
+      });
     });
+  });
 
-    app.get('/user/:userId/accidentalert', function sendAlert(req, res){
+  app.get('/user/:userId/accidentalert', function sendAlert(req, res){
 
-        var customer_id = req.params.userId;
-        console.log("user id is "+customer_id);
+    var customer_id = req.params.userId;
+    winston.info('user id of customer who reported accident is ',customer_id);
 
-        var latitude = req.query.latitude;
-        var longitude = req.query.longitude;
-        console.log("user location: " +latitude +" "+longitude);
+    var latitude = req.query.latitude;
+    var longitude = req.query.longitude;
+    winston.debug('user location: ',latitude,' : ',longitude);
 
-        async.waterfall([
+    async.waterfall([
 
-                function retrieveEcontactsIds(callback){
+      function retrieveEcontactsIds(callback){
 
-                    getCustomerInfo(customer_id, function (err, result) {
+        getCustomerInfo(customer_id, function (err, result) {
 
-                            if (err) return callback(err);
+          if (err) return callback(err);
+          winston.debug('retireved econtactIds successfully');
+          callback(null, result);
+        });
+      },
+      function retireveEcontactsDetails(customerInfo,callback){
 
-                        console.log("retireved econtactIds successfully");
-                        callback(null, result);
+      winston.debug("in parallel async of retrieve econtactsDetails");
+      var customer_name = customerInfo.customer_name;
+      var customer_phone = customerInfo.customer_phone;
+      var econtact1Id = customerInfo.customer_econtact1;
+      var econtact2Id = customerInfo.customer_econtact2;
+      var econtact3Id = customerInfo.customer_econtact3;
 
+      async.parallel({
 
-                    });
-                },
-                function retireveEcontactsDetails(customerInfo,callback){
+        oneContactSending: function(callback){
 
-                    console.log("in parallel async");
-                    console.log(customerInfo.customer_phone);
-                    console.log(customerInfo.customer_name);
-                    console.log(customerInfo.customer_econtact1);
-                    console.log(customerInfo.customer_econtact2);
-                    console.log(customerInfo.customer_econtact3);
-
-                    var customer_name = customerInfo.customer_name;
-                    var customer_phone = customerInfo.customer_phone;
-                    var econtact1Id = customerInfo.customer_econtact1;
-                    var econtact2Id = customerInfo.customer_econtact2;
-                    var econtact3Id = customerInfo.customer_econtact3;
-                    async.parallel({
-
-                        oneContactSending: function(callback){
-
-                            sendAlertToEcontacts(customer_name, customer_phone,
+          sendAlertToEcontacts(customer_name, customer_phone,
                                 latitude,longitude,econtact1Id,
                                 function (err,result) {
 
-                                if (err) return console.log(err);
-                                console.log("sent to alert to " +
-                                "econtact1 successfully ");
-                                console.log(result);
-                            });
-                        },
-                        twoContactSending: function(callback){
+            if (err) return console.log(err);
+            winston.debug('sent to alert to econtact1 successfully ');
+            winston.debug(result);
+          });
+        },
+        twoContactSending: function(callback){
 
-                            sendAlertToEcontacts(customer_name, customer_phone,
+          sendAlertToEcontacts(customer_name, customer_phone,
                                 latitude,longitude,econtact2Id,
                                 function (err,result) {
 
-                                if (err) return console.log(err);
-                                console.log("sent to alert to " +
-                                "econtact2 successfully ");
-                                console.log(result);
-                            });
-                        },
-                        threeContactSending: function(callback){
+            if (err) return console.log(err);
+            winston.debug('sent to alert to econtact2 successfully ');
+            winston.debug(result);
+          });
+        },
+        threeContactSending: function(callback){
 
-                            sendAlertToEcontacts(customer_name, customer_phone,
+          sendAlertToEcontacts(customer_name, customer_phone,
                                 latitude,longitude,econtact3Id,
                                 function (err,result) {
 
-                                if (err) return console.log(err);
-                                console.log("sent to alert to " +
-                                "econtact3 successfully ");
-                                console.log(result);
-                            });
-                        }
-                    },callback);
-                    callback(null,"sent complete");
-                }
+            if (err) return console.log(err);
+            winston.debug('sent to alert to econtact3 successfully ');
+            winston.debug(result);
+          });
+        }
+      },callback);
+      callback(null,"sent complete");
 
-            ], function DoneAlerting(err,result){
+    }],function DoneAlerting(err,result){
 
-                console.log("at done ");
+      console.log("at done ");
 
-            }
-
-        );
-        res.json({"message":"details sent to econtacts"});
     });
+    winston.info('details sent to econtacts');
+    res.json({"message":"details sent to econtacts"});
+  });
 
-    app.get('/user/:userId',function getUserInfo(req, res){
+  app.get('/user/:userId',function getUserInfo(req, res){
 
-        var customer_id = req.params.userId;
-        console.log("incoming customer id: "+customer_id);
+    var customer_id = req.params.userId;
+    winston.info('requesting complete info of user ',customer_id);
+    var customer_name;
+    var customer_phone;
+    var customer_age;
+    var customer_gender;
+    var customer_address;
+    var econtact1Id;
+    var econtact2Id;
+    var econtact3Id;
+    var contact1_name;
+    var contact1_phone;
+    var contact1_email;
+    var contact2_name;
+    var contact2_phone;
+    var contact2_email;
+    var contact3_name;
+    var contact3_phone;
+    var contact3_email;
 
-        var customer_name;
-        var customer_phone;
-        var customer_age;
-        var customer_gender;
-        var customer_address;
-        var econtact1Id;
-        var econtact2Id;
-        var econtact3Id;
-        var contact1_name;
-        var contact1_phone;
-        var contact1_email;
-        var contact2_name;
-        var contact2_phone;
-        var contact2_email;
-        var contact3_name;
-        var contact3_phone;
-        var contact3_email;
+    async.waterfall([
 
-        async.waterfall([
+      function retrieveCustomerInfo(callback){
 
-                function retrieveCustomerInfo(callback){
+        getCustomerInfo(customer_id, function (err, result) {
 
-                    getCustomerInfo(customer_id, function (err, result) {
-
-                        if (err) return callback(err);
-
-                        console.log("retrieved complete customer info successfully successfully");
-                        callback(null, result);
-
-
-                    });
-                },
-                function retireveEcontactsDetails(customerInfo,callback){
-
-                    console.log("in parallel async");
-                    console.log(customerInfo.customer_phone);
-                    console.log(customerInfo.customer_name);
-                    console.log(customerInfo.customer_age);
-                    console.log(customerInfo.customer_gender);
-                    console.log(customerInfo.customer_address);
-                    console.log(customerInfo.customer_econtact1);
-                    console.log(customerInfo.customer_econtact2);
-                    console.log(customerInfo.customer_econtact3);
-
-                    customer_name = customerInfo.customer_name;
-                    customer_phone = customerInfo.customer_phone;
-                    customer_age = customerInfo.customer_age;
-                    customer_gender = customerInfo.customer_gender;
-                    customer_address = customerInfo.customer_address;
-                    econtact1Id = customerInfo.customer_econtact1;
-                    econtact2Id = customerInfo.customer_econtact2;
-                    econtact3Id = customerInfo.customer_econtact3;
-                    async.parallel({
-
-                        retrieveEcontact1Info: function(callback){
-
-                            getEcontactInfo(econtact1Id, function(err, result){
-
-                                if (err) return callback(err);
-
-                                callback(null,result);
-                            });
-                        },
-                        retrieveEcontact2Info: function(callback){
-
-                            getEcontactInfo(econtact2Id, function(err, result){
-
-                                if (err) return callback(err);
-
-                                callback(null,result);
-                            });
-                        },
-                        retrieveEcontact3Info: function(callback){
-
-                            getEcontactInfo(econtact3Id, function(err, result){
-
-                                if (err) return callback(err);
-
-                                callback(null,result);
-                            });
-                        }
-                    },function completeInfo(err,result){
-
-                        console.log("at the end of the tunnel");
-                        console.log(result.retrieveEcontact1Info.contact_name);
-                        console.log(result.retrieveEcontact2Info.contact_name);
-                        console.log(result.retrieveEcontact3Info.contact_name);
-
-                        contact1_name = result.retrieveEcontact1Info.contact_name;
-                        contact2_name = result.retrieveEcontact2Info.contact_name;
-                        contact3_name = result.retrieveEcontact3Info.contact_name;
-                        contact1_phone = result.retrieveEcontact1Info.contact_phone;
-                        contact2_phone = result.retrieveEcontact2Info.contact_phone;
-                        contact3_phone = result.retrieveEcontact3Info.contact_phone;
-                        contact1_email = result.retrieveEcontact1Info.contact_email;
-                        contact2_email = result.retrieveEcontact2Info.contact_email;
-                        contact3_email = result.retrieveEcontact3Info.contact_email;
-
-                        res.json({"name":customer_name,
-                            "age":customer_age,
-                            "gender":customer_age,
-                            "address":customer_address,
-                            "econtact1Name":contact1_name,
-                            "econtact1Phone":contact1_phone,
-                            "econtact1Email":contact1_email,
-                            "econtact2Name":contact2_name,
-                            "econtact2Phone":contact2_phone,
-                            "econtact2Email":contact2_email,
-                            "econtact3Name":contact3_name,
-                            "econtact3Phone":contact3_phone,
-                            "econtact3Email":contact3_email});
-                    });
-                    callback(null,"sent complete");
-                }
-
-        ]);
-    });
-
-    function checkAndUpdateEcontact(eName, ePhone, eEmail, callback){
-
-        var query = "SELECT contacts_id FROM acs_contacts WHERE " +
-                                                "contact_phone = ? ;";
-        var inputs = [ePhone];
-        var injectionQuery = mysql.format(query, inputs);
-        console.log(injectionQuery);
-
-        connection.query(injectionQuery, function resultSet(error, rows){
-
-            if (error) {
-
-                console.log("Error in login module "+ error);
-
-
-            }
-            else {
-
-
-                if (rows[0] === undefined){
-                    console.log(rows[0] === undefined);
-                    console.log("contact not present in db yet");
-
-                    var query1 = "INSERT INTO acs_contacts (contact_name, " +
-                        "contact_phone, contact_email) VALUES (?,?,?);";
-                    var inputs1 = [eName, ePhone, eEmail];
-                    var injectionQuery1 = mysql.format(query1, inputs1);
-                    console.log(injectionQuery1);
-
-                    connection.query(injectionQuery1, function resultSet1(err,
-                                                                          rows){
-
-                        if(err){
-
-                            console.log(err);
-                        }
-                        else{
-
-                            checkAndUpdateEcontact(eName, ePhone,eEmail, function
-                                                            (err, result) {
-
-                                if (err) return callback(err);
-
-                                callback(null, result);
-
-
-                            });
-                        }
-                    });
-
-                }
-                else{
-                    console.log(rows[0]);
-                    console.log(rows[0].contacts_id);
-
-                    //return rows[0].contacts_id;
-
-                    callback(null, rows[0].contacts_id);
-                }
-            }
-
+          if (err) return callback(err);
+          winston.debug('retrieved complete customer info successfully ' +
+          'successfully');
+          callback(null, result);
         });
-    }
+      },
 
-    function getCustomerInfo(customer_id, callback){
+      function retireveEcontactsDetails(customerInfo,callback){
 
-        var query = "SELECT customer_name, " +
+        winston.debug('in parallel async to retrieve econtact info');
+        customer_name = customerInfo.customer_name;
+        customer_phone = customerInfo.customer_phone;
+        customer_age = customerInfo.customer_age;
+        customer_gender = customerInfo.customer_gender;
+        customer_address = customerInfo.customer_address;
+        econtact1Id = customerInfo.customer_econtact1;
+        econtact2Id = customerInfo.customer_econtact2;
+        econtact3Id = customerInfo.customer_econtact3;
+
+        async.parallel({
+
+        retrieveEcontact1Info: function(callback){
+
+          getEcontactInfo(econtact1Id, function(err, result){
+
+            if (err) return callback(err);
+            callback(null,result);
+          });
+        },
+        retrieveEcontact2Info: function(callback){
+
+          getEcontactInfo(econtact2Id, function(err, result){
+
+            if (err) return callback(err);
+            callback(null,result);
+          });
+        },
+        retrieveEcontact3Info: function(callback){
+
+          getEcontactInfo(econtact3Id, function(err, result){
+
+            if (err) return callback(err);
+            callback(null,result);
+          });
+        }
+        },function completeInfo(err,result){
+
+          winston.debug('at the end of the retrieval of complete info');
+          contact1_name = result.retrieveEcontact1Info.contact_name;
+          contact2_name = result.retrieveEcontact2Info.contact_name;
+          contact3_name = result.retrieveEcontact3Info.contact_name;
+          contact1_phone = result.retrieveEcontact1Info.contact_phone;
+          contact2_phone = result.retrieveEcontact2Info.contact_phone;
+          contact3_phone = result.retrieveEcontact3Info.contact_phone;
+          contact1_email = result.retrieveEcontact1Info.contact_email;
+          contact2_email = result.retrieveEcontact2Info.contact_email;
+          contact3_email = result.retrieveEcontact3Info.contact_email;
+
+          winston.info('complete info sent -- customer ',customer_id);
+          res.json({"name":customer_name,
+                     "age":customer_age,
+                     "gender":customer_age,
+                     "address":customer_address,
+                     "econtact1Name":contact1_name,
+                     "econtact1Phone":contact1_phone,
+                     "econtact1Email":contact1_email,
+                     "econtact2Name":contact2_name,
+                     "econtact2Phone":contact2_phone,
+                     "econtact2Email":contact2_email,
+                     "econtact3Name":contact3_name,
+                     "econtact3Phone":contact3_phone,
+                     "econtact3Email":contact3_email});
+        });
+
+        callback(null,"sent complete");
+      }
+    ]);
+  });
+
+  function checkAndUpdateEcontact(eName, ePhone, eEmail, callback){
+
+    var query = "SELECT contacts_id FROM acs_contacts WHERE " +
+                                                "contact_phone = ? ;";
+    var inputs = [ePhone];
+    var injectionQuery = mysql.format(query, inputs);
+    winston.debug('inside checkAndUpdateEcontact function');
+    winston.debug('query to retrieve econtact info ',injectionQuery);
+    connection.query(injectionQuery, function resultSet(error, rows){
+
+      if (error) {
+        winston.info('Error in login module ', error);
+        res.json({"message":"error in updating info"});
+      }
+      else {
+        if (rows[0] === undefined){
+          winston.debug('contact not present in db yet');
+          var query1 = "INSERT INTO acs_contacts (contact_name, " +
+                        "contact_phone, contact_email) VALUES (?,?,?);";
+          var inputs1 = [eName, ePhone, eEmail];
+          var injectionQuery1 = mysql.format(query1, inputs1);
+          winston.debug('query to insert new contact ', injectionQuery1);
+          connection.query(injectionQuery1, function resultSet1(err, rows){
+
+             if(err){
+               winston.info('error instering econtact details ',err);
+               res.json({"message":"error in updating info"});
+             }
+             else{
+               checkAndUpdateEcontact(eName, ePhone,eEmail, function (err,
+                                                                      result) {
+                 if (err) return callback(err);
+                 callback(null, result);
+               });
+             }
+          });
+        }
+        else{
+          winston.debug('retrieved the econtact info ',rows[0].contacts_id);
+          callback(null, rows[0].contacts_id);
+        }
+      }
+    });
+  }
+
+  function getCustomerInfo(customer_id, callback){
+
+    var query = "SELECT customer_name, " +
             "customer_phone, " +
             "customer_age, " +
             "customer_gender, " +
@@ -474,97 +386,96 @@ module.exports = function handlingRequests(connection, app, winston){
             "customer_econtact3 " +
             "FROM acs_cust WHERE customer_id = ? ;";
 
-        var inputs = [customer_id];
-        var injectionQuery = mysql.format(query, inputs);
-        console.log(injectionQuery);
+    var inputs = [customer_id];
+    var injectionQuery = mysql.format(query, inputs);
+    winston.debug('query to getCustomerInfo',injectionQuery);
 
-        connection.query(injectionQuery, function resultSet(err, rows){
+    connection.query(injectionQuery, function resultSet(err, rows){
 
-            if(err){
-                console.log("error in econtactid retrieval: " +err);
-            }
-            else{
+      if(err){
+        winston.info('error in econtactid retrieval: ',err);
+          res.json({"message":"could not retrieve customer info"});
+      }
+      else{
+        callback(null,rows[0]);
+      }
+    });
+  }
 
-                callback(null,rows[0]);
-            }
-        });
-    }
 
-
-    function sendAlertToEcontacts(customer_name, customer_phone, latitude,
+  function sendAlertToEcontacts(customer_name, customer_phone, latitude,
                                   longitude, econtacts_id, callback){
 
-        var query = "SELECT contact_phone, contact_email FROM acs_contacts " +
+    var query = "SELECT contact_phone, contact_email FROM acs_contacts " +
             "WHERE contacts_id = ? ;";
 
-        var inputs = [econtacts_id];
-        var injectionQuery = mysql.format(query, inputs);
-        console.log(injectionQuery);
+    var inputs = [econtacts_id];
+    var injectionQuery = mysql.format(query, inputs);
+    winston.debug('query to retrieve contacts info ',injectionQuery);
 
-        connection.query(injectionQuery, function resultSet(err, rows){
+    connection.query(injectionQuery, function resultSet(err, rows){
 
-            if(err){
-                console.log("error in contact info retrieval: " +err);
-            }
-            else{
+      if(err){
+        winston.info('error in contact info retrieval: ',err);
+      }
+      else{
 
-                console.log(rows[0]);
+        //console.log(rows[0]);
 
-                //starting to send alert
-                var mailOptions = {
-
-                    to: ""+rows[0].contact_email+","+
-                        rows[0].contact_phone+"@tmomail.net,"+
-                        rows[0].contact_phone+"@mms.att.net, "+
-                        rows[0].contact_phone+"@vtext.com, "+
-                        rows[0].contact_phone+"@vmobl.com, "+
-                        rows[0].contact_phone+"@messaging.sprintpcs.com",
-                    subject : "Toy Story Alert",
-                    text : customer_name+" using phone number "+customer_phone+
-                    " at ("+latitude+","+longitude+") has once said:" +
-                    " TO INFINITY AND BEYOND!!!"
+        winston.info('strated to send alert');
+        var mailOptions = {
+          to: ""+rows[0].contact_email+","+
+                 rows[0].contact_phone+"@tmomail.net,"+
+                 rows[0].contact_phone+"@mms.att.net, "+
+                 rows[0].contact_phone+"@vtext.com, "+
+                 rows[0].contact_phone+"@vmobl.com, "+
+                 rows[0].contact_phone+"@messaging.sprintpcs.com",
+          subject : "Accident Alert",
+          text : customer_name+" using phone number "+customer_phone+
+                    " at https://maps.google.com/maps?q="+latitude+","+
+          longitude+" has meet with an accident.. APRIL FOOL!!!"
                 }
-                console.log(mailOptions);
-                smtpTransport.sendMail(mailOptions, function mailSent(err,
-                                                                      result){
+        winston.debug('this is mail options used ',mailOptions);
+        smtpTransport.sendMail(mailOptions, function mailSent(err, result){
 
-                    if(err){
-
-                        console.log(err);
-                    }
-                    else{
-                        console.log("message sent successfully to "+
+          if(err){
+            winston.info(err);
+            res.json({"message":"unable to send mails and emails to " +
+            "emergency contacts"})
+          }
+          else{
+            winston.info('message sent successfully to ',
                         rows[0].contact_email);
-                        callback(null,"confirmed!!");
-                        //console.log(result);
-                    }
-                });
-
-
-            }
+            callback(null,"confirmed!!");
+            //console.log(result);
+          }
         });
-    }
 
-    function getEcontactInfo(contact_id, callback){
 
-        var query = "SELECT contact_name, " +
+      }
+    });
+  }
+
+  function getEcontactInfo(contact_id, callback){
+
+    var query = "SELECT contact_name, " +
             "contact_phone, " +
             "contact_email " +
             "FROM acs_contacts WHERE contacts_id = ? ;";
 
-        var inputs = [contact_id];
-        var injectionQuery = mysql.format(query, inputs);
-        console.log(injectionQuery);
+    var inputs = [contact_id];
+    var injectionQuery = mysql.format(query, inputs);
+    winston.debug('query to request econtact info ',injectionQuery);
 
-        connection.query(injectionQuery, function resultSet(err, rows){
+    connection.query(injectionQuery, function resultSet(err, rows){
 
-            if(err){
-                console.log("error in econtacts retrieval: " +err);
-            }
-            else{
-
-                callback(null,rows[0]);
-            }
-        });
-    }
+      if(err){
+        winston.info('error in econtacts retrieval: ',err);
+        res.json({"message":"could not retrieve econtact info"});
+      }
+      else{
+        callback(null,rows[0]);
+      }
+    });
+  }
 }

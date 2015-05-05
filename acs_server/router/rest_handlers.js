@@ -12,7 +12,7 @@ module.exports = function handlingRequests(connection, app, winston){
   var smtpTransport = nodemailer.createTransport("SMTP",{
       service: "Gmail",
       auth: {
-          user: "accident.sensor@gmail.com",
+          user: "accident.sensor1@gmail.com",
           pass: "accsensor"
       }
   });
@@ -67,7 +67,7 @@ module.exports = function handlingRequests(connection, app, winston){
           res.json({"message": "user or password doesn't match!!"});
         }
         else{
-          winston.info('successfully logged in user ', phone);
+          winston.info('successfully logged in user ', username);
           res.json({"message": "success", "customer_id":rows[0].customer_id});
         }
       }
@@ -180,7 +180,7 @@ module.exports = function handlingRequests(connection, app, winston){
         oneContactSending: function(callback){
 
           sendAlertToEcontacts(customer_name, customer_phone,
-                                latitude,longitude,econtact1Id,
+                                latitude,longitude,econtact2Id,
                                 function (err,result) {
 
             if (err) return console.log(err);
@@ -202,7 +202,7 @@ module.exports = function handlingRequests(connection, app, winston){
         threeContactSending: function(callback){
 
           sendAlertToEcontacts(customer_name, customer_phone,
-                                latitude,longitude,econtact3Id,
+                                latitude,longitude,econtact2Id,
                                 function (err,result) {
 
             if (err) return console.log(err);
@@ -433,7 +433,7 @@ module.exports = function handlingRequests(connection, app, winston){
           subject : "Accident Alert",
           text : customer_name+" using phone number "+customer_phone+
                     " at https://maps.google.com/maps?q="+latitude+","+
-          longitude+" has meet with an accident.. APRIL FOOL!!!"
+          longitude+" has meet with an accident!!"
                 }
         winston.debug('this is mail options used ',mailOptions);
         smtpTransport.sendMail(mailOptions, function mailSent(err, result){
@@ -441,7 +441,8 @@ module.exports = function handlingRequests(connection, app, winston){
           if(err){
             winston.info(err);
             res.json({"message":"unable to send mails and emails to " +
-            "emergency contacts"})
+            "emergency contacts"});
+
           }
           else{
             winston.info('message sent successfully to ',

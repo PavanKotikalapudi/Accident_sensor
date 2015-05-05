@@ -12,7 +12,7 @@ module.exports = function handlingRequests(connection, app, winston){
   var smtpTransport = nodemailer.createTransport("SMTP",{
       service: "Gmail",
       auth: {
-          user: "accident.sensor1@gmail.com",
+          user: "accident.sensor@gmail.com",
           pass: "accsensor"
       }
   });
@@ -431,17 +431,17 @@ module.exports = function handlingRequests(connection, app, winston){
                  rows[0].contact_phone+"@vmobl.com, "+
                  rows[0].contact_phone+"@messaging.sprintpcs.com",
           subject : "Accident Alert",
-          text : customer_name+" using phone number "+customer_phone+
-                    " at https://maps.google.com/maps?q="+latitude+","+
-          longitude+" has meet with an accident!!"
-                }
+          text : customer_name+" - phone number "+customer_phone+"- has met " +
+          "with an accident at https://maps.google.com/maps?q="+latitude+
+          ","+ longitude+" please reach out immediately. "
+        }
         winston.debug('this is mail options used ',mailOptions);
         smtpTransport.sendMail(mailOptions, function mailSent(err, result){
 
           if(err){
-            winston.info(err);
             res.json({"message":"unable to send mails and emails to " +
             "emergency contacts"});
+            winston.info(err);
 
           }
           else{

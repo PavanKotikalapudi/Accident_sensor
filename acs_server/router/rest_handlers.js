@@ -180,7 +180,7 @@ module.exports = function handlingRequests(connection, app, winston){
         oneContactSending: function(callback){
 
           sendAlertToEcontacts(customer_name, customer_phone,
-                                latitude,longitude,econtact2Id,
+                                latitude,longitude,econtact1Id,
                                 function (err,result) {
 
             if (err) return console.log(err);
@@ -202,7 +202,7 @@ module.exports = function handlingRequests(connection, app, winston){
         threeContactSending: function(callback){
 
           sendAlertToEcontacts(customer_name, customer_phone,
-                                latitude,longitude,econtact2Id,
+                                latitude,longitude,econtact3Id,
                                 function (err,result) {
 
             if (err) return console.log(err);

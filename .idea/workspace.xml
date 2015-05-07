@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="9d4f909f-25c9-46de-821d-8e5fd79139a4" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/acs_server/router/rest_handlers.js" afterPath="$PROJECT_DIR$/acs_server/router/rest_handlers.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/acs_server/server.js" afterPath="$PROJECT_DIR$/acs_server/server.js" />
     </list>
     <ignored path="acs-server.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -30,8 +29,8 @@
       <file leaf-file-name="server.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/acs_server/server.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="126" max-vertical-offset="468">
-              <caret line="9" column="17" selection-start-line="9" selection-start-column="17" selection-end-line="9" selection-end-column="17" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="522">
+              <caret line="8" column="2" selection-start-line="8" selection-start-column="2" selection-end-line="8" selection-end-column="2" />
               <folding>
                 <element signature="e#0#39#0" expanded="false" />
               </folding>
@@ -39,21 +38,31 @@
           </provider>
         </entry>
       </file>
+      <file leaf-file-name="mylogfile.log" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/acs_server/mylogfile.log">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.652568" vertical-offset="0" max-vertical-offset="331">
+              <caret line="12" column="0" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="db_access.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/acs_server/router/db_access.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="449" max-vertical-offset="828">
+            <state vertical-scroll-proportion="0.0" vertical-offset="187" max-vertical-offset="828">
               <caret line="34" column="9" selection-start-line="34" selection-start-column="9" selection-end-line="34" selection-end-column="9" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="rest_handlers.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="rest_handlers.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/acs_server/router/rest_handlers.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="10.060606" vertical-offset="162" max-vertical-offset="3582">
-              <caret line="443" column="30" selection-start-line="443" selection-start-column="30" selection-end-line="443" selection-end-column="30" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="2862" max-vertical-offset="3582">
+              <caret line="435" column="58" selection-start-line="435" selection-start-column="58" selection-end-line="435" selection-end-column="58" />
               <folding>
                 <element signature="e#609#1464#0" expanded="false" />
                 <element signature="e#2605#5219#0" expanded="false" />
@@ -82,8 +91,8 @@
         <option value="$PROJECT_DIR$/router/rest_handlers.js" />
         <option value="$PROJECT_DIR$/acs_server/package.json" />
         <option value="$PROJECT_DIR$/acs_server/router/db_access.js" />
-        <option value="$PROJECT_DIR$/acs_server/server.js" />
         <option value="$PROJECT_DIR$/acs_server/router/rest_handlers.js" />
+        <option value="$PROJECT_DIR$/acs_server/server.js" />
       </list>
     </option>
   </component>
@@ -253,7 +262,7 @@
     <editor active="false" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32935917" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.49329358" sideWeight="0.49962035" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.44262296" sideWeight="0.49962035" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24981017" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -457,10 +466,25 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/acs_server/router/rest_handlers.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="2862" max-vertical-offset="3582">
+          <caret line="435" column="58" selection-start-line="435" selection-start-column="58" selection-end-line="435" selection-end-column="58" />
+          <folding>
+            <element signature="e#609#1464#0" expanded="false" />
+            <element signature="e#2605#5219#0" expanded="false" />
+            <element signature="e#7826#11471#0" expanded="false" />
+            <element signature="e#11541#13269#0" expanded="false" />
+            <element signature="e#13320#14096#0" expanded="false" />
+            <element signature="e#15994#16596#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/acs_server/server.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="468">
-          <caret line="9" column="17" selection-start-line="9" selection-start-column="17" selection-end-line="9" selection-end-column="17" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="522">
+          <caret line="8" column="2" selection-start-line="8" selection-start-column="2" selection-end-line="8" selection-end-column="2" />
           <folding>
             <element signature="e#0#39#0" expanded="false" />
           </folding>
@@ -475,18 +499,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/acs_server/router/rest_handlers.js">
+    <entry file="file://$PROJECT_DIR$/acs_server/mylogfile.log">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="10.060606" vertical-offset="162" max-vertical-offset="3582">
-          <caret line="443" column="30" selection-start-line="443" selection-start-column="30" selection-end-line="443" selection-end-column="30" />
-          <folding>
-            <element signature="e#609#1464#0" expanded="false" />
-            <element signature="e#2605#5219#0" expanded="false" />
-            <element signature="e#7826#11471#0" expanded="false" />
-            <element signature="e#11541#13269#0" expanded="false" />
-            <element signature="e#13320#14096#0" expanded="false" />
-            <element signature="e#15994#16596#0" expanded="false" />
-          </folding>
+        <state vertical-scroll-proportion="0.652568" vertical-offset="0" max-vertical-offset="331">
+          <caret line="12" column="0" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>

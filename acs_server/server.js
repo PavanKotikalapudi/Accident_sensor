@@ -5,6 +5,9 @@ var express = require('express');
 var winston = require('winston');
 var app = express();
 
+winston.add(winston.transports.File, { filename: 'mylogfile.log',
+  level: 'debug'});
+
 require('./router/db_access')(app,winston);
 
 //uncomment below line to see debug details of server

@@ -1,0 +1,12 @@
+{"level":"info","message":"Acs server using logger on http://0.0.0.0:8181","timestamp":"2015-05-06T05:14:21.684Z"}
+{"level":"info","message":"connection successfully established to MySQL","timestamp":"2015-05-06T05:14:21.687Z"}
+{"level":"info","message":"configured nodemailer. ready to serve","timestamp":"2015-05-06T05:14:21.863Z"}
+{"level":"info","message":"requesting complete info of user  3","timestamp":"2015-05-06T05:15:55.895Z"}
+{"level":"debug","message":"query to getCustomerInfo SELECT customer_name, customer_phone, customer_age, customer_gender, customer_address, customer_econtact1, customer_econtact2, customer_econtact3 FROM acs_cust WHERE customer_id = '3' ;","timestamp":"2015-05-06T05:15:55.896Z"}
+{"level":"debug","message":"retrieved complete customer info successfully successfully","timestamp":"2015-05-06T05:15:55.920Z"}
+{"level":"debug","message":"in parallel async to retrieve econtact info","timestamp":"2015-05-06T05:15:55.920Z"}
+{"level":"debug","message":"query to request econtact info  SELECT contact_name, contact_phone, contact_email FROM acs_contacts WHERE contacts_id = 1 ;","timestamp":"2015-05-06T05:15:55.920Z"}
+{"level":"debug","message":"query to request econtact info  SELECT contact_name, contact_phone, contact_email FROM acs_contacts WHERE contacts_id = 2 ;","timestamp":"2015-05-06T05:15:55.921Z"}
+{"level":"debug","message":"query to request econtact info  SELECT contact_name, contact_phone, contact_email FROM acs_contacts WHERE contacts_id = 3 ;","timestamp":"2015-05-06T05:15:55.921Z"}
+{"level":"debug","message":"at the end of the retrieval of complete info","timestamp":"2015-05-06T05:15:55.924Z"}
+{"level":"info","message":"complete info sent -- customer  3","timestamp":"2015-05-06T05:15:55.924Z"}
